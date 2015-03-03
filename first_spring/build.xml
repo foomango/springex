@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 
 <project name="springapp" basedir="." default="usage">
+  <property file="build.properties"/>
+
   <property name="src.dir" value="src"/>
   <property name="web.dir" value="war"/>
   <property name="build.dir" value="${web.dir}/WEB-INF/classes"/>
@@ -35,5 +37,71 @@
     <echo message="stop       --> Stop Tomcat application"/>
     <echo message="list       --> List Tomcat application"/>
     <echo message=""/>
+  </target>
+
+  <target name="build" description="Compile main source tree java files">
+    <mkdir dir="${build.dir}"/>
+    <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+      deprecation="flase" optimize="false" failonerror="true">
+      <src path="${src.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>
+  </target>
+
+  <target name="deploy" depends="build" description="Deploy application">
+    <copy todir="${deploy.path}/${name}" preservelastmodified="true">
+      <fileset dir="${web.dir}">
+        <include name="**/*.*"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="deploywar" depends="build" description="Deploy application as a WAR file">
+    <war destfile="${name}.war" webxml="${web.dir}/WEB-INF/web.xml">
+      <fileset dir="${web.dir}">
+        <include name="**/*.*"/>
+      </fileset>
+    </war>
+    <copy todir="${deploy.path}" preservelastmodified="true">
+      <fileset dir=".">
+        <include name="*.war"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <!-- ============================================================== -->
+  <!-- Tomcat tasks - remove these if you don't have Tomcat installed -->
+  <!-- ============================================================== -->
+
+  <path id="catalina-ant-classpath">
+    <!-- We need the Catalina jars for Tomcat -->
+    <!--  * for other app servers - check the docs -->
+    <fileset dir="${appserver.lib}">
+      <include name="catalina-ant.jar"/>
+    </fileset>
+  </path>
+
+  <taskdef name="install" classname="org.apache.catalina.ant.InstallTask">
+    <classpath refid="catalina-ant-classpath"/>
+  </taskdef>
+  <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">
+    <classpath refid="catalina-ant-classpath"/>
+  </taskdef>
+  <taskdef name="list" classname="org.apache.catalina.ant.ListTask">
+    <classpath refid="catalina-ant-classpath"/>
+  </taskdef>
+  <taskdef name="start" classname="org.apache.catalina.ant.StartTask">
+    <classpath refid="catalina-ant-classpath"/>
+  </taskdef>
+  <taskdef name="stop" classname="org.apache.catalina.ant.StopTask">
+    <classpath refid="catalina-ant-classpath"/>
+  </taskdef>
+
+  <target name="install" description="Install application in Tomcat">
+    <install url="${tomcat.manager.url}"
+      username="${tomcat.manager.username}"
+      password="${tomcat.manager.password}"
+      path="/${name}"
+      war="${name}"/>
   </target>
 </project>
