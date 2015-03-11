@@ -6,6 +6,7 @@
   <property name="src.dir" value="src"/>
   <property name="web.dir" value="war"/>
   <property name="build.dir" value="${web.dir}/WEB-INF/classes"/>
+  <property name="test.dir" value="test"/>
   <property name="name" value="springapp"/>
 
   <path id="master-classpath">
@@ -42,10 +43,46 @@
   <target name="build" description="Compile main source tree java files">
     <mkdir dir="${build.dir}"/>
     <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
-      deprecation="flase" optimize="false" failonerror="true">
+        deprecation="flase" optimize="false" failonerror="true">
       <src path="${src.dir}"/>
       <classpath refid="master-classpath"/>
     </javac>
+  </target>
+
+  <target name="buildtests" description="Compile test tree java files">
+    <mkdir dir="${build.dir}"/>
+    <javac destdir="${build.dir}" source="1.5" target="1.5" debug="true"
+        deprecation="false" optimize="false" failonerror="true">
+      <src path="${test.dir}"/>
+      <classpath refid="master-classpath"/>
+    </javac>
+  </target>
+
+  <target name="tests" depends="build, buildtests" description="Run tests">
+    <junit printsummary="on"
+        fork="false"
+        haltonfailure="false"
+        failureproperty="tests.failed"
+        showoutput="true">
+      <classpath refid="master-classpath"/>
+      <formatter type="brief" usefile="false"/>
+
+      <batchtest>
+        <fileset dir="${build.dir}">
+          <include name="**/*Tests.*"/>
+        </fileset>
+      </batchtest>
+
+    </junit>
+
+    <fail if="tests.failed">
+      tests.failed=${tests.failed}
+      ***********************************************************
+      ***********************************************************
+      ****  One or more tests failed!  Check the output ...  ****
+      ***********************************************************
+      ***********************************************************
+    </fail>
   </target>
 
   <target name="deploy" depends="build" description="Deploy application">
@@ -78,10 +115,15 @@
     <!--  * for other app servers - check the docs -->
     <fileset dir="${appserver.lib}">
       <include name="catalina-ant.jar"/>
+      <include name="tomcat-coyote.jar"/>
+      <include name="tomcat-util.jar"/>
+    </fileset>
+    <fileset dir="${appserver.home}/bin">
+      <include name="tomcat-juli.jar"/>
     </fileset>
   </path>
 
-  <taskdef name="install" classname="org.apache.catalina.ant.InstallTask">
+  <taskdef name="install" classname="org.apache.catalina.ant.DeployTask">
     <classpath refid="catalina-ant-classpath"/>
   </taskdef>
   <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask">
@@ -99,9 +141,38 @@
 
   <target name="install" description="Install application in Tomcat">
     <install url="${tomcat.manager.url}"
-      username="${tomcat.manager.username}"
-      password="${tomcat.manager.password}"
-      path="/${name}"
-      war="${name}"/>
+        username="${tomcat.manager.username}"
+        password="${tomcat.manager.password}"
+        path="/${name}"
+        war="${name}"/>
   </target>
+
+  <target name="reload" description="Reload application in Tomcat">
+    <reload url="${tomcat.manager.url}"
+        username="${tomcat.manager.username}"
+        password="${tomcat.manager.password}"
+        path="/${name}"/>
+  </target>
+
+  <target name="start" description="Start Tomcat application">
+    <start url="${tomcat.manager.url}"
+        username="${tomcat.manager.username}"
+        password="${tomcat.manager.password}"
+        path="/${name}"/>
+  </target>
+
+  <target name="stop" description="Stop Tomcat application">
+    <stop url="${tomcat.manager.url}"
+        username="${tomcat.manager.username}"
+        password="${tomcat.manager.password}"
+        path="/${name}"/>
+  </target>
+
+  <target name="list" description="List Tomcat application">
+    <list url="${tomcat.manager.url}"
+        username="${tomcat.manager.username}"
+        password="${tomcat.manager.password}"/>
+  </target>
+
+  <!-- End Tomcat tasks -->
 </project>
