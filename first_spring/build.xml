@@ -30,7 +30,11 @@
     <echo message="Available targets are:"/>
     <echo message=""/>
     <echo message="build      --> Build the application"/>
+    <echo message="clean      --> Clean output directories"/>
+    <echo message="buildtests --> Compile test tree java files"/>
+    <echo message="tests      --> Run tests"/>
     <echo message="deploy     --> Deploy application as directory"/>
+    <echo message="undeploy   --> Un-deploy application"/>
     <echo message="deploywar  --> Deploy application as a WAR file"/>
     <echo message="install    --> Install application in Tomcat"/>
     <echo message="reload     --> Reload application in Tomcat"/>
@@ -38,6 +42,22 @@
     <echo message="stop       --> Stop Tomcat application"/>
     <echo message="list       --> List Tomcat application"/>
     <echo message=""/>
+  </target>
+
+  <target name="clean" description="Clean output directories">
+    <delete>
+      <fileset dir="${build.dir}">
+        <include name="**/*.class"/>
+      </fileset>
+    </delete>
+  </target>
+
+  <target name="undeploy" description="Un-Deploy application">
+    <delete>
+      <fileset dir="${deploy.path}/${name}">
+        <include name="**/*.*"/>
+      </fileset>
+    </delete>
   </target>
 
   <target name="build" description="Compile main source tree java files">
