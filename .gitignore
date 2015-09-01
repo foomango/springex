@@ -14,3 +14,6 @@ hs_err_pid*
 *.swp
 target/
 gs_maven/dependency-reduced-pom.xml
+
+first_spring/db/test.lck
+first_spring/db/test.log
