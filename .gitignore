@@ -18,3 +18,7 @@ gs_maven/dependency-reduced-pom.xml
 first_spring/db/test.lck
 first_spring/db/test.log
 first_spring/db/test.properties
+
+# eclipse
+.classpath
+.project
